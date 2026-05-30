@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operations Management Interactive Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 40vh;
+    max-height: 400px;
+}
+@media (min-width: 768px) {
+    .chart-container {
+        height: 350px;
+    }
+}
+body {
+    background-color: #faf9f6;
+    color: #292524;
+    font-family: system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+}
+.tab-active {
+    border-bottom: 2px solid #d97706;
+    color: #d97706;
+    font-weight: 600;
+}
+</style>
+</head>
+<body class="antialiased">
+
+<!-- Chosen Palette: Warm Neutrals (Stone) with Amber and Emerald Accents -->
+<!-- Application Structure Plan: The SPA is designed as an interactive learning dashboard. It translates the linear ADHD study protocol and Operations Management course materials into a non-linear but highly structured exploratory tool. Sections are divided into Core Concepts (The 4 Vs, Process Matrix), Real-world Applications (Cases), the Gemini AI Study Center, and an Interactive Checklist for the study protocol. This allows users to actively manipulate variables (like the 4 Vs) and see immediate visual feedback, reinforcing learning through interaction rather than passive reading. -->
+<!-- Visualization & Content Choices: Report Info -> Goal -> Viz/Presentation -> Interaction -> Justification -> Library. 1. The 4 Vs -> Inform/Change -> Radar Chart -> Sliders -> Shows dynamic impact of operational choices -> Chart.js. 2. Process Matrix -> Organize/Relationships -> Scatter Plot -> Clickable points -> Visualizes the 'natural diagonal' trade-offs -> Chart.js. 3. Case Studies -> Compare -> Tabbed Text Blocks -> Click to switch -> Chunks qualitative data -> HTML/JS. 4. Study Protocol -> Organize -> Interactive Checklist -> Click to complete -> Drives active learning -> HTML/JS. Confirming NO SVG/Mermaid. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<nav class="sticky top-0 z-50 bg-[#f5f5f4] border-b border-[#e7e5e4] shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+        <div class="text-xl font-bold text-[#d97706] tracking-tight">&#9632; OpsMastery</div>
+        <div class="flex gap-2 sm:gap-4 mt-2 sm:mt-0 text-sm overflow-x-auto">
+            <button onclick="navTo('intro')" class="hover:text-[#d97706] transition-colors font-medium px-2 py-1">Intro</button>
+            <button onclick="navTo('four-vs')" class="hover:text-[#d97706] transition-colors font-medium px-2 py-1">The 4 Vs</button>
+            <button onclick="navTo('matrix')" class="hover:text-[#d97706] transition-colors font-medium px-2 py-1">Matrix</button>
+            <button onclick="navTo('ai-center')" class="hover:text-[#d97706] transition-colors font-medium px-2 py-1">AI Center</button>
+            <button onclick="navTo('cases')" class="hover:text-[#d97706] transition-colors font-medium px-2 py-1">Cases</button>
+            <button onclick="navTo('protocol')" class="hover:text-[#d97706] transition-colors font-medium px-2 py-1">Protocol</button>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-6xl mx-auto px-4 py-8 space-y-16">
+
+    <section id="intro" class="scroll-mt-20">
+        <div class="bg-white p-6 md:p-10 rounded-2xl shadow-sm border border-[#e7e5e4]">
+            <h1 class="text-3xl md:text-4xl font-bold text-[#1c1917] mb-4">Topic 01: Operations & Process Management</h1>
+            <p class="text-lg text-[#57534e] leading-relaxed mb-6">
+                Welcome to the first topic in Operations and Process Management. This dashboard is designed to help you synthesize the core concepts of process design, structural layout, and operational strategy. Operations management is the function responsible for the design, management, and improvement of processes that create and deliver products or services. Every organization uses an input-transformation-output model. Here, you will actively explore how varying operational profiles dictate different business strategies.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-[#fef3c7] p-4 rounded-xl border border-[#fde68a]">
+                    <div class="text-2xl mb-2">&#128229;</div>
+                    <h3 class="font-bold text-[#92400e]">Inputs</h3>
+                    <p class="text-sm text-[#92400e] mt-1">Transformed resources (Materials, Information, Customers) & Transforming resources (Facilities, Staff, Capital).</p>
+                </div>
+                <div class="bg-[#d1fae5] p-4 rounded-xl border border-[#a7f3d0]">
+                    <div class="text-2xl mb-2">&#9881;</div>
+                    <h3 class="font-bold text-[#065f46]">Transformation</h3>
+                    <p class="text-sm text-[#065f46] mt-1">The network of activities and buffers that treat, convert, or process the inputs.</p>
+                </div>
+                <div class="bg-[#e0e7ff] p-4 rounded-xl border border-[#c7d2fe]">
+                    <div class="text-2xl mb-2">&#128228;</div>
+                    <h3 class="font-bold text-[#3730a3]">Outputs</h3>
+                    <p class="text-sm text-[#3730a3] mt-1">The final products and services delivered to satisfy customer and market demands.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="four-vs" class="scroll-mt-20">
+        <h2 class="text-2xl md:text-3xl font-bold text-[#1c1917] mb-4">The 4 Vs Profile Analyzer</h2>
+        <p class="text-[#57534e] mb-8 max-w-3xl leading-relaxed">
+            This section explores the four dimensions of operations: Volume, Variety, Variation, and Visibility. Adjust the sliders below to see how different business models configure their operational profiles. High volume generally leads to lower unit costs, while high variety requires layout flexibility. The radar chart dynamically reflects your operational choices.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-[#e7e5e4]">
+            <div class="space-y-6">
+                <div>
+                    <div class="flex justify-between items-end mb-1">
+                        <label class="font-semibold text-[#292524]">Volume</label>
+                        <span id="val-vol" class="text-sm font-bold text-[#d97706]">Medium</span>
+                    </div>
+                    <input type="range" id="slide-vol" min="1" max="100" value="50" class="w-full h-2 bg-[#e7e5e4] rounded-lg appearance-none cursor-pointer accent-[#d97706]">
+                    <p class="text-xs text-[#78716c] mt-1">Low (Unique items) to High (Mass production)</p>
+                </div>
+                <div>
+                    <div class="flex justify-between items-end mb-1">
+                        <label class="font-semibold text-[#292524]">Variety</label>
+                        <span id="val-var" class="text-sm font-bold text-[#d97706]">Medium</span>
+                    </div>
+                    <input type="range" id="slide-var" min="1" max="100" value="50" class="w-full h-2 bg-[#e7e5e4] rounded-lg appearance-none cursor-pointer accent-[#d97706]">
+                    <p class="text-xs text-[#78716c] mt-1">Low (Standardized) to High (Customized)</p>
+                </div>
+                <div>
+                    <div class="flex justify-between items-end mb-1">
+                        <label class="font-semibold text-[#292524]">Variation in Demand</label>
+                        <span id="val-vardem" class="text-sm font-bold text-[#d97706]">Medium</span>
+                    </div>
+                    <input type="range" id="slide-vardem" min="1" max="100" value="50" class="w-full h-2 bg-[#e7e5e4] rounded-lg appearance-none cursor-pointer accent-[#d97706]">
+                    <p class="text-xs text-[#78716c] mt-1">Low (Stable/Predictable) to High (Seasonal/Volatile)</p>
+                </div>
+                <div>
+                    <div class="flex justify-between items-end mb-1">
+                        <label class="font-semibold text-[#292524]">Visibility</label>
+                        <span id="val-vis" class="text-sm font-bold text-[#d97706]">Medium</span>
+                    </div>
+                    <input type="range" id="slide-vis" min="1" max="100" value="50" class="w-full h-2 bg-[#e7e5e4] rounded-lg appearance-none cursor-pointer accent-[#d97706]">
+                    <p class="text-xs text-[#78716c] mt-1">Low (Back-office) to High (Customer-facing)</p>
+                </div>
+                
+                <div class="bg-[#f5f5f4] p-4 rounded-lg border border-[#e7e5e4]">
+                    <h4 class="font-bold text-sm text-[#292524] mb-1">Analysis Result:</h4>
+                    <p id="analysis-text" class="text-sm text-[#57534e]">Adjust sliders to see operational implications.</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-center">
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="matrix" class="scroll-mt-20">
+        <h2 class="text-2xl md:text-3xl font-bold text-[#1c1917] mb-4">The Product-Process Matrix</h2>
+        <p class="text-[#57534e] mb-8 max-w-3xl leading-relaxed">
+            The Product-Process Matrix illustrates the relationship between process types and their volume-variety characteristics. Operating on the "natural diagonal" results in optimal cost efficiency. Operating to the right yields unnecessary flexibility and excess costs, while operating to the left creates extreme rigidity. Click on the points below to learn more about each layout.
+        </p>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-[#e7e5e4]">
+            <div class="chart-container">
+                <canvas id="scatterChart"></canvas>
+            </div>
+            <div id="matrix-info" class="mt-6 hidden bg-[#ecfdf5] border border-[#a7f3d0] p-4 rounded-xl transition-all">
+                <h3 id="matrix-info-title" class="font-bold text-[#065f46] text-lg">Title</h3>
+                <p id="matrix-info-desc" class="text-[#065f46] mt-2 text-sm">Description</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="ai-center" class="scroll-mt-20">
+        <div class="bg-gradient-to-tr from-[#fffbeb] to-white p-6 md:p-8 rounded-2xl shadow-md border border-[#f59e0b]/40">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-[#1c1917]">✨ Gemini AI Active Study Center</h2>
+                    <p class="text-[#57534e] mt-1 text-sm">Active Socratic exam simulation, feedback, and voice-assisted reviews.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button id="ai-tab-examiner" onclick="switchAiTab('examiner')" class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg bg-[#d97706] text-white transition-all shadow-sm">✨ Socratic Examiner</button>
+                    <button id="ai-tab-voice" onclick="switchAiTab('voice')" class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg bg-[#f5f5f4] text-[#57534e] hover:bg-[#e7e5e4] transition-all">🎙️ Voice Exam Mode</button>
+                    <button id="ai-tab-explainer" onclick="switchAiTab('explainer')" class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg bg-[#f5f5f4] text-[#57534e] hover:bg-[#e7e5e4] transition-all">✨ Explainer Chat</button>
+                </div>
+            </div>
+
+            <!-- TAB 1: SOCRATIC EXAMINER -->
+            <div id="ai-examiner-container" class="space-y-6">
+                <div class="bg-white p-5 rounded-xl border border-[#e7e5e4] shadow-inner space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <span class="text-xs font-bold text-[#78716c] uppercase tracking-wider">Dynamic Examiner Module</span>
+                        <button onclick="generateQuestion()" class="bg-[#d97706] hover:bg-[#b45309] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm">✨ Generate Question (Aligned to Sliders)</button>
+                    </div>
+                    <div id="exam-question-area" class="text-[#292524] text-base leading-relaxed italic p-4 bg-[#faf9f6] rounded-lg border border-[#e7e5e4] min-h-[60px]">
+                        Click "Generate Question" above to summon the Master's level examiner.
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="block text-sm font-semibold text-[#292524]">Type your oral answer response here:</label>
+                    <textarea id="student-answer-input" rows="4" class="w-full p-4 border border-[#d6d3d1] rounded-xl focus:ring-2 focus:ring-[#d97706] bg-white text-[#292524] outline-none transition-all placeholder:text-stone-400" placeholder="Type your application breakdown or process design theory from memory..."></textarea>
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <button onclick="submitAnswer()" class="bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all shadow-sm">✨ Submit Answer for Feedback</button>
+                        <button id="btn-completion-mark" onclick="markStep10Complete()" class="hidden bg-[#4f46e5] hover:bg-[#4338ca] text-white text-xs font-bold px-4 py-2.5 rounded-lg transition-all shadow-sm">✨ Complete Protocol Step 10</button>
+                    </div>
+                </div>
+
+                <div id="grading-output-card" class="hidden bg-white p-5 rounded-xl border border-[#e7e5e4] shadow-sm space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#e7e5e4] pb-3">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">⚡</span>
+                            <h3 class="font-bold text-[#1c1917] text-lg">Critique & Analysis</h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-bold text-[#78716c]">Score:</span>
+                            <span id="student-score-badge" class="text-lg font-extrabold text-[#d97706] px-3 py-1 bg-[#fffbeb] rounded-lg border border-[#fde68a]">-- / 100</span>
+                        </div>
+                    </div>
+                    <div id="grading-critique-text" class="text-sm text-[#44403c] space-y-3 leading-relaxed">
+                    </div>
+                    <div class="pt-2 flex justify-end">
+                        <button onclick="playCritiqueTTS()" class="flex items-center gap-2 bg-[#d97706] hover:bg-[#b45309] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm">
+                            <span>🔊</span> ✨ Listen to Overview Summary
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: ACTIVE VOICE EXAM MODE -->
+            <div id="ai-voice-exam-container" class="hidden space-y-6">
+                <div class="bg-white p-5 rounded-xl border border-[#e7e5e4] shadow-inner space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex flex-col gap-1">
+                            <span class="text-xs font-bold text-[#78716c] uppercase tracking-wider">🎙️ Oral Board Simulator (Voice Chat)</span>
+                            <div class="flex items-center gap-3 mt-1">
+                                <span class="text-xs font-bold text-[#78716c] uppercase">Mode:</span>
+                                <select id="voice-exam-mode-select" onchange="onVoiceModeChange()" class="text-xs font-bold p-1.5 border border-[#d6d3d1] rounded-lg bg-white text-[#292524] outline-none">
+                                    <option value="quiz">Random Quiz Questions</option>
+                                    <option value="feynman">Feynman Challenge: Matrix Diagonal</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="startVoiceExam()" class="bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm">🎙️ Start Voice Exam</button>
+                            <button onclick="stopVoiceExamAudio()" class="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-bold px-3 py-2 rounded-lg transition-all">Stop Audio</button>
+                        </div>
+                    </div>
+                    <div id="voice-timer-display" class="hidden text-xl font-black text-[#ef4444] text-right tracking-widest font-mono">
+                        TIMER: 120s
+                    </div>
+                    <div id="voice-question-area" class="text-[#292524] text-base leading-relaxed italic p-4 bg-[#faf9f6] rounded-lg border border-[#e7e5e4] min-h-[60px]">
+                        Tap "Start Voice Exam" to begin your vocal oral exam. The examiner will speak the query out loud!
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-sm font-semibold text-[#292524]">Your Spoken/Transcribed Answer Response:</label>
+                        <button id="voice-record-btn" onclick="toggleVoiceDictation()" class="px-3.5 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 border border-red-200 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all shadow-sm">
+                            <span id="voice-record-icon">🎙️</span> <span id="voice-record-text">Tap to Speak Answer</span>
+                        </button>
+                    </div>
+                    <textarea id="voice-answer-transcript" rows="4" class="w-full p-4 border border-[#d6d3d1] rounded-xl focus:ring-2 focus:ring-[#d97706] bg-white text-[#292524] outline-none transition-all placeholder:text-stone-400" placeholder="Dictation transcription will appear here. You can also manually adjust or type your answer before submission..."></textarea>
+                    
+                    <div class="flex justify-end">
+                        <button onclick="submitVoiceAnswer()" class="bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all shadow-sm">⚡ Submit Answer for Live Grading</button>
+                    </div>
+                </div>
+
+                <div id="voice-grading-output-card" class="hidden bg-white p-5 rounded-xl border border-[#e7e5e4] shadow-sm space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#e7e5e4] pb-3">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🥇</span>
+                            <h3 class="font-bold text-[#1c1917] text-lg">Oral Board Grade & Gaps</h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-bold text-[#78716c]">Score:</span>
+                            <span id="voice-score-badge" class="text-lg font-extrabold text-[#d97706] px-3 py-1 bg-[#fffbeb] rounded-lg border border-[#fde68a]">-- / 100</span>
+                        </div>
+                    </div>
+                    <div id="voice-critique-text" class="text-sm text-[#44403c] space-y-3 leading-relaxed">
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: EXPLAINER CHAT -->
+            <div id="ai-explainer-container" class="hidden space-y-6">
+                <div class="bg-white p-5 rounded-xl border border-[#e7e5e4] shadow-inner space-y-4">
+                    <label class="block text-sm font-bold text-[#292524]">Operations Concept explainer & voice assistant:</label>
+                    <div class="flex gap-2">
+                        <input id="explainer-query-input" type="text" class="flex-1 p-3 border border-[#d6d3d1] rounded-xl outline-none focus:ring-2 focus:ring-[#d97706]" placeholder="e.g., Explain the difference between transformed and transforming resources...">
+                        <button onclick="askExplainer()" class="bg-[#d97706] hover:bg-[#b45309] text-white text-xs font-bold px-5 py-3 rounded-xl transition-all shadow-sm">✨ Ask AI</button>
+                    </div>
+                    <div id="explainer-output-area" class="text-[#44403c] text-sm leading-relaxed p-4 bg-[#faf9f6] rounded-lg border border-[#e7e5e4] min-h-[60px] space-y-2">
+                        Type a question above to dynamically explain concepts using Gemini LLM.
+                    </div>
+                    <div id="explainer-audio-button-container" class="hidden flex justify-end">
+                        <button onclick="playExplainerTTS()" class="flex items-center gap-2 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm">
+                            <span>🔊</span> ✨ Read Aloud
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="ai-loading-overlay" class="hidden flex items-center justify-center gap-3 bg-stone-950/50 rounded-2xl fixed inset-0 z-50 text-white font-bold">
+                <span class="animate-spin text-3xl">⚙️</span>
+                <span class="text-lg">AI is processing. Please hold on...</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="cases" class="scroll-mt-20">
+        <h2 class="text-2xl md:text-3xl font-bold text-[#1c1917] mb-4">Real-World Case Studies</h2>
+        <p class="text-[#57534e] mb-8 max-w-3xl leading-relaxed">
+            Real-world examples bridge the gap between theory and application. This section synthesizes the key insights from the essential readings, demonstrating how different organizations configure their operations to meet strategic goals. Select a case below to explore its core operational challenge and resolution.
+        </p>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-[#e7e5e4] overflow-hidden">
+            <div class="flex border-b border-[#e7e5e4] overflow-x-auto bg-[#f5f5f4]" id="tab-headers">
+            </div>
+            <div class="p-6 md:p-8" id="tab-content">
+            </div>
+        </div>
+    </section>
+
+    <section id="protocol" class="scroll-mt-20">
+        <h2 class="text-2xl md:text-3xl font-bold text-[#1c1917] mb-4">Active Study Protocol Checklist</h2>
+        <p class="text-[#57534e] mb-8 max-w-3xl leading-relaxed">
+            Execute your study plan using this interactive checklist based on the ADHD-friendly protocol. This linear pathway shifts your cognitive load from organizing materials to actively retrieving knowledge. Check off each step as you complete the high-friction, rapid-fire learning blocks to build strong exam recall.
+        </p>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-[#e7e5e4] space-y-6">
+            <div class="mb-4 flex items-center justify-between">
+                <span class="text-sm font-bold text-[#78716c] uppercase tracking-wider">Overall Progress</span>
+                <span id="progress-text" class="text-sm font-bold text-[#059669]">0%</span>
+            </div>
+            <div class="w-full bg-[#e7e5e4] rounded-full h-2.5 mb-8">
+                <div id="progress-bar" class="bg-[#059669] h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+
+            <div id="checklist-container" class="space-y-4">
+            </div>
+
+            <div id="weak-concepts-shelf" class="hidden p-5 bg-[#fef2f2] border border-[#fca5a5] rounded-xl space-y-3 transition-all duration-300">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📚</span>
+                    <h3 class="font-bold text-[#991b1b] text-base">Weak Concepts Review Shelf</h3>
+                </div>
+                <p class="text-xs text-[#b91c1c] leading-relaxed">
+                    The following concepts were diagnosed from your note uploads. Review these critical points before taking your final mock board exam.
+                </p>
+                <div id="shelf-items" class="space-y-3">
+                </div>
+            </div>
+            
+            <div id="completion-message" class="hidden mt-8 bg-[#fef3c7] border border-[#f59e0b] p-6 rounded-xl text-center">
+                <div class="text-4xl mb-2">&#127942;</div>
+                <h3 class="text-xl font-bold text-[#92400e]">Topic 01 Complete!</h3>
+                <p class="text-[#92400e] mt-2">You have successfully moved from passive recognition to active retrieval.</p>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="bg-[#f5f5f4] border-t border-[#e7e5e4] mt-16 py-8 text-center text-[#78716c] text-sm">
+    <div class="max-w-6xl mx-auto px-4">
+        &copy; 2026 OpsMastery Interactive Guide. Generated from Topic 01 Source Reports.
+    </div>
+</footer>
+
+<script>
+let radarChartInstance = null;
+let scatterChartInstance = null;
+
+const apiKey = "";
+
+const caseData = [
+    {
+        id: 'case-jj',
+        title: 'Johnson & Johnson (Pharma)',
+        icon: '&#128138;',
+        problem: 'For decades, pharmaceutical companies manufactured drugs using batch processes in large vats. High block-buster margins blunted motivation to improve. However, generic competition forced a need for massive cost reduction and quality control.',
+        solution: 'Shifted to Pharmaceutical Continuous Manufacturing (PCM). Raw materials are fed into a single, continuous line. Quality is checked without interrupting production.',
+        impact: 'Operating costs reduced by 30%+, production times cut from weeks to hours, and facility footprint slashed from 100,000 sq ft to 4,000 sq ft.'
+    },
+    {
+        id: 'case-pret',
+        title: 'Prêt A Manger',
+        icon: '&#127828;',
+        problem: 'Operating in a highly competitive, fast-paced food retail sector where speed and fresh quality are paramount. Demand fluctuates heavily during lunch hours.',
+        solution: 'Each shop has its own kitchen where fresh ingredients are delivered daily and prepared throughout the day. Staff are highly trained, incentivized via mystery shoppers, and rotated between kitchen and till.',
+        impact: 'Optimizes the performance objective of speed and quality. Reduces inventory waste (unsold food goes to charity daily) and maintains high customer visibility standards.'
+    },
+    {
+        id: 'case-bpr',
+        title: 'Business Process Re-engineering',
+        icon: '&#9874;',
+        problem: 'Traditional vertical functional departments create "tunnel vision," where teams focus on narrow goals. Handoffs between units cause delays, errors, and blurred accountability.',
+        solution: 'BPR advocates for restructuring along end-to-end process lines rather than functional silos, improving interfaces between activities that support product provision.',
+        impact: 'Increases market responsiveness and aligns organizational objectives. However, it can lead to duplication of functional expertise if not managed carefully.'
+    },
+    {
+        id: 'case-hotels',
+        title: 'Ski Verbier vs Formule 1',
+        icon: '&#127976;',
+        problem: 'Two hospitality operations delivering the "same" core product (a bed for the night) but competing on entirely different market strategies requiring vastly different layouts.',
+        solution: 'Ski Verbier utilizes a flexible layout to fulfill unique, high-visibility client requests (Low Volume, High Variety). Formule 1 uses rigid, standardized volumetric prefabrications and automated check-ins (High Volume, Low Variety).',
+        impact: 'Demonstrates that the product does not dictate the layout; the competitive strategy does. Formule 1 achieves rock-bottom unit costs, while Verbier achieves high premium value.'
+    }
+];
+
+const checklistData = [
+    { block: 'Block A: Strategy & Matrix', tasks: [
+        { id: 't1', text: 'Step 1: Watch Mini-Lecture 2 pt.1 (4 Vs) & complete 2-min brain dump.', duration: 120, hasUpload: true },
+        { id: 't2', text: 'Step 2: Watch Mini-Lecture 2 pt.2 (Process Types) & complete 2-min brain dump.', duration: 120, hasUpload: true },
+        { id: 't3', text: 'Step 3: Extract "Layout Matrix" & "Natural Diagonal" from Reading 4.', hasUpload: true }
+    ]},
+    { block: 'Block B: Vocab & Hierarchies', tasks: [
+        { id: 't4', text: 'Step 4: Read Mini-Lecture 1 pt.1 (Inputs/Outputs) & list dominant resources.', duration: 120, hasUpload: true },
+        { id: 't5', text: 'Step 5: Read Mini-Lecture 1 pt.2 (Hierarchies) & dump "Internal Customer" mindset.', duration: 120, hasUpload: true },
+        { id: 't6', text: 'Step 6: Extract Pret A Manger & Ski Verbier context from Reading 2.', hasUpload: true }
+    ]},
+    { block: 'Block C: Real-World Case Extraction', tasks: [
+        { id: 't7', text: 'Step 7: Interrogate J&J Article: Identify catalysts and gains of continuous flow.', hasUpload: true },
+        { id: 't8', text: 'Step 8: Interrogate BPR Paper: Identify dangers of vertical silos.', hasUpload: true }
+    ]},
+    { block: 'Block D: Active Stress-Tests', tasks: [
+        { id: 't9', text: 'Step 9: Review Quizzes and Self-Assessment Notes (Cover answers).' },
+        { id: 't10', text: 'Step 10: Run the Embedded Socratic Examiner above and submit feedback.' },
+        { id: 't11', text: 'Step 11: Go to AI Center (Voice Mode), complete your Feynman Voice Memo on the Matrix Diagonal, and submit for evaluation.', duration: 120, hasUpload: false }
+    ]}
+];
+
+const quizQuestions = [
+    { q: "Which of the following activities is NOT a direct responsibility of operations management?", expected: "determining the exact mix of products and services that customers will want", explanation: "Determining exact customer mix is usually a marketing/strategic sales function rather than standard internal process execution." },
+    { q: "All companies have an operations function but it is not always called by that name. Which of the following could be an operations function?", expected: "the local banks which are branches within a large international bank", explanation: "Local branches manage transactions, customer processes, and local resources, which is a classic service operation." },
+    { q: "Which of the following decisions is least likely to be made by an operations manager?", expected: "deciding which market areas to manufacture products for", explanation: "Choosing market segments and targets is a corporate-level strategic marketing function." },
+    { q: "What are the input resources to any transformation process?", expected: "staff, facilities, materials, information and customers", explanation: "Staff and facilities are transforming resources; materials, information, and customers are transformed resources." },
+    { q: "The philosophy that recommends the redesign of process boundaries and organizational responsibilities around end-to-end processes is called:", expected: "business process re-engineering", explanation: "BPR focuses on restructuring vertical, functional silos into horizontally integrated end-to-end process structures." },
+    { q: "Operations can be classified according to their volume and variety. Which of the following operations would be classified as high volume, low variety?", expected: "a fast-food restaurant", explanation: "Fast food places deliver identical, standardized products in massive daily volume." },
+    { q: "How would you describe supermarkets in terms of the four Vs?", expected: "high volume, low variety, low variation and high visibility", explanation: "They operate with massive scale, highly repeatable items, steady demand profiles, and extremely high customer visibility/contact." },
+    { q: "Which of the following is the correct order for process types starting with low volume/high variety and moving to high volume/low variety?", expected: "project processes, jobbing processes, batch processes, mass processes, continuous", explanation: "This represents the natural diagonal path from low-scale custom to endless flow automation on the product-process matrix." },
+    { q: "Which of the following is true of service shops?", expected: "service shops include banks, high street shops and car rental companies", explanation: "Service shops sit in the middle of volume/variety, combining standard back-office tasks with partially customizable front-office actions." },
+    { q: "The layout of an operation is concerned with deciding where to put:", expected: "staff, machines, facilities and equipment", explanation: "Operational layout determines the spatial and physical alignment of all transforming resources." }
+];
+
+const state = {
+    currentTab: 'case-jj',
+    aiTab: 'examiner',
+    currentQuestion: '',
+    latestAnalysis: null,
+    latestCritiqueText: '',
+    latestScore: null,
+    latestExplainerAnswer: '',
+    tasksCompleted: new Set(),
+    weakConcepts: {},
+    voiceExamIndex: 0,
+    currentVoiceQuestion: '',
+    voiceTimerVal: 120,
+    voiceTimerInterval: null,
+    speechActive: false
+};
+
+let runningIntervals = {};
+let recognition = null;
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechReq = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechReq();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                transcript += event.results[i][0].transcript + ' ';
+            }
+        }
+        if (transcript) {
+            document.getElementById('voice-answer-transcript').value += transcript;
+        }
+    };
+
+    recognition.onerror = (e) => {
+        console.error("Speech recognition error:", e);
+    };
+}
+
+function initApp() {
+    init4VChart();
+    setupSliders();
+    initMatrixChart();
+    renderCasesHeaders();
+    renderCaseContent();
+    renderChecklist();
+    updateProgress();
+}
+
+function getSliderLabel(val) {
+    if (val < 33) return 'Low';
+    if (val < 66) return 'Medium';
+    return 'High';
+}
+
+function analyze4Vs(vol, varity, vardem, vis) {
+    let costAssumption = 'Medium';
+    let layoutAssumption = 'Batch / Functional';
+    let text = '';
+
+    if (vol > 66 && varity < 33 && vardem < 33 && vis < 33) {
+        costAssumption = 'Very Low';
+        layoutAssumption = 'Continuous / Line';
+        text = 'Profile points to Mass/Continuous processes. High standardization allows for heavy automation and rock-bottom unit costs (e.g., Formule 1 Hotel, Bottling plant).';
+    } else if (vol < 33 && varity > 66 && vis > 66) {
+        costAssumption = 'High';
+        layoutAssumption = 'Project / Fixed-Position';
+        text = 'Profile points to highly customized, customer-facing services. Requires highly skilled staff and immense flexibility (e.g., Luxury bespoke services, consulting).';
+    } else if (vol > 50 && varity > 50) {
+        text = 'Warning: High volume and high variety simultaneously is difficult to achieve without massive capital investment in agile/flexible manufacturing systems.';
+        layoutAssumption = 'Cellular';
+    } else {
+        text = 'A balanced profile typical of Batch processing or Service Shops. Requires balancing standardization with necessary customer variety.';
+    }
+
+    document.getElementById('analysis-text').innerText = text + ` (Est. Unit Cost: ${costAssumption} | Optimal Layout: ${layoutAssumption})`;
+}
+
+function setupSliders() {
+    const ids = ['vol', 'var', 'vardem', 'vis'];
+    ids.forEach(id => {
+        document.getElementById(`slide-${id}`).addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById(`val-${id}`).innerText = getSliderLabel(val);
+            update4VChart();
+        });
+    });
+    update4VChart(); 
+}
+
+function update4VChart() {
+    const vol = parseInt(document.getElementById('slide-vol').value);
+    const varity = parseInt(document.getElementById('slide-var').value);
+    const vardem = parseInt(document.getElementById('slide-vardem').value);
+    const vis = parseInt(document.getElementById('slide-vis').value);
+
+    analyze4Vs(vol, varity, vardem, vis);
+
+    if (radarChartInstance) {
+        radarChartInstance.data.datasets[0].data = [vol, varity, vardem, vis];
+        radarChartInstance.update();
+    }
+}
+
+function init4VChart() {
+    const ctx = document.getElementById('radarChart').getContext('2d');
+    radarChartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Volume', 'Variety', 'Variation', 'Visibility'],
+            datasets: [{
+                label: 'Current Profile',
+                data: [50, 50, 50, 50],
+                backgroundColor: 'rgba(217, 119, 6, 0.2)',
+                borderColor: 'rgba(217, 119, 6, 1)',
+                pointBackgroundColor: 'rgba(217, 119, 6, 1)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: '#e7e5e4' },
+                    grid: { color: '#e7e5e4' },
+                    pointLabels: { font: { size: 13, family: 'system-ui' }, color: '#57534e' },
+                    ticks: { display: false, min: 0, max: 100 }
+                }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+function initMatrixChart() {
+    const ctx = document.getElementById('scatterChart').getContext('2d');
+    
+    const matrixData = [
+        { x: 10, y: 90, name: 'Project', desc: 'Highly customized, unique products. Fixed-position layout. High unit cost. (e.g., Movie production, large construction).' },
+        { x: 30, y: 70, name: 'Jobbing', desc: 'Low volume, high variety. Resources shared across unique orders. Functional layout. (e.g., Bespoke tailoring).' },
+        { x: 50, y: 50, name: 'Batch', desc: 'Medium volume, medium variety. Groups of identical items processed together. Cell/Functional layout. (e.g., Commercial baking).' },
+        { x: 70, y: 30, name: 'Mass', desc: 'High volume, low variety. Repetitive, predictable workflow. Line layout. (e.g., Auto assembly line).' },
+        { x: 90, y: 10, name: 'Continuous', desc: 'Highest volume, lowest variety. Automated, endless flow. Inseparable products. Line layout. (e.g., Chemical refinery).' }
+    ];
+
+    scatterChartInstance = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Process Types',
+                data: matrixData,
+                backgroundColor: '#059669',
+                pointRadius: 8,
+                pointHoverRadius: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { 
+                    title: { display: true, text: 'Volume (Low -> High)', color: '#57534e', font: {weight: 'bold'} },
+                    min: 0, max: 100, ticks: {display: false}, grid: {color: '#e7e5e4'}
+                },
+                y: { 
+                    title: { display: true, text: 'Variety (Low <- High)', color: '#57534e', font: {weight: 'bold'} },
+                    min: 0, max: 100, ticks: {display: false}, grid: {color: '#e7e5e4'}
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.raw.name;
+                        }
+                    }
+                }
+            },
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const idx = elements[0].index;
+                    const dataPoint = matrixData[idx];
+                    const infoBox = document.getElementById('matrix-info');
+                    document.getElementById('matrix-info-title').innerText = dataPoint.name + ' Process';
+                    document.getElementById('matrix-info-desc').innerText = dataPoint.desc;
+                    infoBox.classList.remove('hidden');
+                }
+            }
+        },
+        plugins: [{
+            id: 'diagonalLine',
+            beforeDraw: (chart) => {
+                const ctx = chart.ctx;
+                const xAxis = chart.scales.x;
+                const yAxis = chart.scales.y;
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(xAxis.getPixelForValue(0), yAxis.getPixelForValue(100));
+                ctx.lineTo(xAxis.getPixelForValue(100), yAxis.getPixelForValue(0));
+                ctx.lineWidth = 20;
+                ctx.strokeStyle = 'rgba(217, 119, 6, 0.15)';
+                ctx.stroke();
+                ctx.restore();
+            }
+        }]
+    });
+}
+
+function renderCasesHeaders() {
+    const container = document.getElementById('tab-headers');
+    let html = '';
+    caseData.forEach(c => {
+        const isActive = state.currentTab === c.id;
+        html += `<button onclick="switchTab('${c.id}')" class="px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors hover:bg-stone-200 ${isActive ? 'tab-active bg-white' : 'text-stone-500'}">
+            <span class="mr-2">${c.icon}</span>${c.title}
+        </button>`;
+    });
+    container.innerHTML = html;
+}
+
+function renderCaseContent() {
+    const activeCase = caseData.find(c => c.id === state.currentTab);
+    if (!activeCase) return;
+    
+    const container = document.getElementById('tab-content');
+    container.innerHTML = `
+        <h3 class="text-xl font-bold text-[#292524] mb-4">${activeCase.icon} ${activeCase.title}</h3>
+        <div class="space-y-4">
+            <div>
+                <h4 class="font-bold text-[#b45309] text-sm uppercase tracking-wider mb-1">The Problem / Context</h4>
+                <p class="text-[#57534e] bg-[#fffbeb] p-3 rounded-lg border border-[#fde68a]">${activeCase.problem}</p>
+            </div>
+            <div>
+                <h4 class="font-bold text-[#047857] text-sm uppercase tracking-wider mb-1">The Operational Solution</h4>
+                <p class="text-[#57534e] bg-[#ecfdf5] p-3 rounded-lg border border-[#a7f3d0]">${activeCase.solution}</p>
+            </div>
+            <div>
+                <h4 class="font-bold text-[#4338ca] text-sm uppercase tracking-wider mb-1">Strategic Impact</h4>
+                <p class="text-[#57534e] bg-[#e0e7ff] p-3 rounded-lg border border-[#c7d2fe]">${activeCase.impact}</p>
+            </div>
+        </div>
+    `;
+}
+
+function switchTab(id) {
+    state.currentTab = id;
+    renderCasesHeaders();
+    renderCaseContent();
+}
+
+function renderChecklist() {
+    const container = document.getElementById('checklist-container');
+    let html = '';
+    
+    checklistData.forEach(block => {
+        html += `<div class="mb-6">
+            <h3 class="font-bold text-[#1c1917] mb-3 bg-[#f5f5f4] py-2 px-3 rounded-md border border-[#e7e5e4]">${block.block}</h3>
+            <div class="space-y-2 pl-2">`;
+        
+        block.tasks.forEach(task => {
+            const isChecked = state.tasksCompleted.has(task.id);
+            
+            let timerHtml = '';
+            if (task.duration) {
+                timerHtml = `
+                    <div class="flex items-center gap-2 flex-wrap mb-1">
+                        <button onclick="toggleTimer('${task.id}', ${task.duration}, event)" id="btn-timer-${task.id}" class="px-2.5 py-1 bg-[#fffbeb] hover:bg-[#fef3c7] text-[#b45309] border border-[#fde68a] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all shadow-sm">
+                            <span>⏱️</span> <span id="timer-label-${task.id}">Start Timer (${formatTime(task.duration)})</span>
+                        </button>
+                        <span id="timer-alert-${task.id}" class="hidden text-xs font-bold text-[#ef4444] animate-pulse">⏰ Time is up! Dump complete!</span>
+                    </div>
+                `;
+            }
+
+            let uploadHtml = '';
+            if (task.hasUpload) {
+                const hasGaps = state.weakConcepts[task.id] && state.weakConcepts[task.id].length > 0;
+                let gapListHtml = '';
+                if (hasGaps) {
+                    gapListHtml = `<div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg text-xs space-y-1.5 text-stone-700">
+                        <span class="font-bold text-[#991b1b]">Detected Concept Gaps (Review Later):</span>
+                        <ul class="list-disc pl-4 space-y-1 text-stone-600">
+                            ${state.weakConcepts[task.id].map(g => `<li><strong>${g.concept}</strong>: ${g.explanation} (Remedy: <span class="italic text-stone-700">${g.remedy}</span>)</li>`).join('')}
+                        </ul>
+                    </div>`;
+                }
+
+                uploadHtml = `
+                    <div class="mt-1 flex flex-col gap-1.5">
+                        <label class="text-[11px] font-semibold text-stone-500 uppercase tracking-wide">📸 active audit: upload corrections / omitted terms photo</label>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <input type="file" id="file-${task.id}" accept="image/*" onchange="handleImageUpload('${task.id}', event)" class="hidden">
+                            <button onclick="document.getElementById('file-${task.id}').click(); event.stopPropagation();" class="px-3 py-1 bg-white hover:bg-stone-50 text-stone-700 border border-stone-300 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all shadow-sm">
+                                <span>📸</span> Choose Notes Photo
+                            </button>
+                            <span id="upload-status-${task.id}" class="text-xs text-stone-400">No correction note parsed yet</span>
+                        </div>
+                        ${gapListHtml}
+                    </div>
+                `;
+            }
+
+            let subBlockHtml = '';
+            if (timerHtml || uploadHtml) {
+                subBlockHtml = `
+                    <div class="ml-8 mt-1.5 flex flex-col gap-2">
+                        ${timerHtml}
+                        ${uploadHtml}
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="p-2 hover:bg-[#f5f5f4] rounded-lg transition-colors">
+                    <label class="flex items-start gap-3 cursor-pointer group">
+                        <input type="checkbox" onchange="toggleTask('${task.id}')" ${isChecked ? 'checked' : ''} 
+                            class="mt-1 w-5 h-5 text-[#059669] bg-white border-[#d6d3d1] rounded focus:ring-[#059669]">
+                        <span id="label-${task.id}" class="text-[#44403c] ${isChecked ? 'line-through text-[#a8a29e]' : ''} select-none transition-all">${task.text}</span>
+                    </label>
+                    ${subBlockHtml}
+                </div>
+            `;
+        });
+        
+        html += `</div></div>`;
+    });
+    
+    container.innerHTML = html;
+}
+
+function toggleTimer(taskId, duration, event) {
+    event.stopPropagation();
+    event.preventDefault();
+    
+    const labelElem = document.getElementById(`timer-label-${taskId}`);
+    const btnElem = document.getElementById(`btn-timer-${taskId}`);
+    const alertElem = document.getElementById(`timer-alert-${taskId}`);
+
+    if (runningIntervals[taskId]) {
+        clearInterval(runningIntervals[taskId]);
+        delete runningIntervals[taskId];
+        labelElem.innerText = `Start Timer (${formatTime(duration)})`;
+        btnElem.className = "px-2.5 py-1 bg-[#fffbeb] hover:bg-[#fef3c7] text-[#b45309] border border-[#fde68a] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all shadow-sm";
+        alertElem.classList.add('hidden');
+    } else {
+        let timeLeft = duration;
+        alertElem.classList.add('hidden');
+        btnElem.className = "px-2.5 py-1 bg-[#fee2e2] hover:bg-[#fecaca] text-[#991b1b] border border-[#fca5a5] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all shadow-sm animate-pulse";
+        
+        const updateDisplay = () => {
+            labelElem.innerText = `Stop (${formatTime(timeLeft)})`;
+        };
+        
+        updateDisplay();
+        
+        runningIntervals[taskId] = setInterval(() => {
+            timeLeft--;
+            if (timeLeft <= 0) {
+                clearInterval(runningIntervals[taskId]);
+                delete runningIntervals[taskId];
+                labelElem.innerText = `Reset (${formatTime(duration)})`;
+                btnElem.className = "px-2.5 py-1 bg-[#fffbeb] hover:bg-[#fef3c7] text-[#b45309] border border-[#fde68a] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all shadow-sm";
+                alertElem.classList.remove('hidden');
+                playBeepSound();
+            } else {
+                updateDisplay();
+            }
+        }, 1000);
+    }
+}
+
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+function playBeepSound() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 880; 
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.8);
+    } catch (e) {
+        console.error("Audio Context playback failed", e);
+    }
+}
+
+function handleImageUpload(taskId, event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const statusElem = document.getElementById(`upload-status-${taskId}`);
+    if (statusElem) statusElem.innerText = `Reading file: ${file.name}...`;
+
+    const reader = new FileReader();
+    reader.onloadend = async function() {
+        const base64Data = reader.result.split(',')[1];
+        const mimeType = file.type;
+        await processNoteImage(taskId, base64Data, mimeType);
+    };
+    reader.readAsDataURL(file);
+}
+
+async function processNoteImage(taskId, base64Data, mimeType) {
+    showAiLoader(true);
+    const statusElem = document.getElementById(`upload-status-${taskId}`);
+    if (statusElem) statusElem.innerText = "Analyzing notes with Gemini...";
+
+    try {
+        const systemPrompt = "You are an expert multi-modal Master's tutor in Operations and Process Management. Analyze note correction files and extract weak concept data in valid JSON format only.";
+        const promptText = "Analyze this image of hand-written student notes or study corrections. Identify the specific Operations Management terms, formulas, or concepts that the student marked, highlighted, or wrote in a different color (like red, orange, or highlighted marker) indicating they forgot them or made errors during active brain-dumping. Output your analysis strictly as JSON matching this schema: { \"weakConcepts\": [ { \"concept\": \"Name of concept\", \"explanation\": \"Concise OM explanation of what they missed or got wrong\", \"remedy\": \"Action plan to remedy this gap\" } ] }";
+
+        const payload = {
+            contents: [{
+                role: "user",
+                parts: [
+                    { text: promptText },
+                    { inlineData: { mimeType: mimeType, data: base64Data } }
+                ]
+            }],
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "OBJECT",
+                    properties: {
+                        weakConcepts: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    concept: { type: "STRING" },
+                                    explanation: { type: "STRING" },
+                                    remedy: { type: "STRING" }
+                                },
+                                required: ["concept", "explanation", "remedy"]
+                            }
+                        }
+                    },
+                    required: ["weakConcepts"]
+                }
+            }
+        };
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const result = await fetchWithRetry(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        const parsed = JSON.parse(textResponse);
+
+        if (parsed.weakConcepts && parsed.weakConcepts.length > 0) {
+            state.weakConcepts[taskId] = parsed.weakConcepts;
+            if (statusElem) statusElem.innerText = `Parsed ${parsed.weakConcepts.length} weak concepts successfully!`;
+        } else {
+            state.weakConcepts[taskId] = [];
+            if (statusElem) statusElem.innerText = "Analyzed note. No distinct red/correction items detected.";
+        }
+
+        renderChecklist();
+        renderWeakConceptsShelf();
+    } catch (err) {
+        if (statusElem) statusElem.innerText = "Analysis failed: " + err.message;
+        alert("Image parsing failed: " + err.message);
+    } finally {
+        showAiLoader(false);
+    }
+}
+
+function renderWeakConceptsShelf() {
+    const shelf = document.getElementById('weak-concepts-shelf');
+    const container = document.getElementById('shelf-items');
+    
+    const allGaps = [];
+    Object.keys(state.weakConcepts).forEach(taskId => {
+        const task = checklistData.flatMap(b => b.tasks).find(t => t.id === taskId);
+        const taskTitle = task ? task.text.split(':')[0] : 'Task';
+        state.weakConcepts[taskId].forEach(gap => {
+            allGaps.push({ ...gap, taskTitle });
+        });
+    });
+
+    if (allGaps.length === 0) {
+        shelf.classList.add('hidden');
+        return;
+    }
+
+    shelf.classList.remove('hidden');
+    let html = '';
+    allGaps.forEach(g => {
+        html += `
+            <div class="bg-white p-3 rounded-lg border border-red-200 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-md uppercase tracking-wider">${g.taskTitle}</span>
+                </div>
+                <h4 class="font-bold text-stone-900 text-sm mt-1">🔴 ${g.concept}</h4>
+                <p class="text-xs text-stone-600 mt-1">${g.explanation}</p>
+                <div class="mt-2 text-xs bg-stone-50 p-2 rounded border border-stone-200">
+                    <strong class="text-stone-800">Mastery Action:</strong> <span class="italic text-stone-600">${g.remedy}</span>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function toggleTask(id) {
+    if (state.tasksCompleted.has(id)) {
+        state.tasksCompleted.delete(id);
+    } else {
+        state.tasksCompleted.add(id);
+    }
+    renderChecklist();
+    updateProgress();
+}
+
+function updateProgress() {
+    const totalTasks = checklistData.reduce((acc, block) => acc + block.tasks.length, 0);
+    const completed = state.tasksCompleted.size;
+    const percentage = Math.round((completed / totalTasks) * 100);
+    
+    document.getElementById('progress-bar').style.width = `${percentage}%`;
+    document.getElementById('progress-text').innerText = `${percentage}%`;
+    
+    const msgBlock = document.getElementById('completion-message');
+    if (percentage === 100) {
+        msgBlock.classList.remove('hidden');
+    } else {
+        msgBlock.classList.add('hidden');
+    }
+}
+
+function navTo(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+
+function switchAiTab(tabName) {
+    state.aiTab = tabName;
+    const tabExaminer = document.getElementById('ai-tab-examiner');
+    const tabVoice = document.getElementById('ai-tab-voice');
+    const tabExplainer = document.getElementById('ai-tab-explainer');
+    
+    const examContainer = document.getElementById('ai-examiner-container');
+    const voiceContainer = document.getElementById('ai-voice-exam-container');
+    const explainerContainer = document.getElementById('ai-explainer-container');
+
+    const activeBtnClass = "px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg bg-[#d97706] text-white transition-all shadow-sm";
+    const inactiveBtnClass = "px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg bg-[#f5f5f4] text-[#57534e] hover:bg-[#e7e5e4] transition-all";
+
+    tabExaminer.className = inactiveBtnClass;
+    tabVoice.className = inactiveBtnClass;
+    tabExplainer.className = inactiveBtnClass;
+    
+    examContainer.classList.add('hidden');
+    voiceContainer.classList.add('hidden');
+    explainerContainer.classList.add('hidden');
+
+    if (tabName === 'examiner') {
+        tabExaminer.className = activeBtnClass;
+        examContainer.classList.remove('hidden');
+    } else if (tabName === 'voice') {
+        tabVoice.className = activeBtnClass;
+        voiceContainer.classList.remove('hidden');
+    } else if (tabName === 'explainer') {
+        tabExplainer.className = activeBtnClass;
+        explainerContainer.classList.remove('hidden');
+    }
+}
+
+function onVoiceModeChange() {
+    stopVoiceExamAudio();
+    if (state.voiceTimerInterval) {
+        clearInterval(state.voiceTimerInterval);
+    }
+    document.getElementById('voice-timer-display').classList.add('hidden');
+    document.getElementById('voice-question-area').innerText = "Select 'Start Voice Exam' after selecting your mode.";
+    document.getElementById('voice-answer-transcript').value = "";
+    document.getElementById('voice-grading-output-card').classList.add('hidden');
+}
+
+async function fetchWithRetry(url, options, maxRetries = 5) {
+    let delay = 1000;
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            const response = await fetch(url, options);
+            if (response.ok) {
+                return await response.json();
+            }
+        } catch (e) {
+        }
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 2;
+    }
+    throw new Error("Unable to connect to the AI service. Please check your network or try again later.");
+}
+
+function showAiLoader(show) {
+    const loader = document.getElementById('ai-loading-overlay');
+    if (show) {
+        loader.classList.remove('hidden');
+    } else {
+        loader.classList.add('hidden');
+    }
+}
+
+function pcmToWav(base64Data, sampleRate = 24000) {
+    const binaryString = atob(base64Data);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    const buffer = new ArrayBuffer(44 + len);
+    const view = new DataView(buffer);
+
+    // Standard RIFF/WAVE header specification (no overlaps or duplicated lines)
+    view.setUint32(0, 0x52494646, false);   // "RIFF"
+    view.setUint32(4, 36 + len, true);       // Chunk size
+    view.setUint32(8, 0x57415645, false);   // "WAVE"
+    view.setUint32(12, 0x666d7420, false);  // "fmt "
+    view.setUint32(16, 16, true);           // Subchunk1Size = 16
+    view.setUint16(20, 1, true);            // AudioFormat = 1 (linear PCM)
+    view.setUint16(22, 1, true);            // NumChannels = 1 (mono)
+    view.setUint32(24, sampleRate, true);   // SampleRate
+    view.setUint32(28, sampleRate * 2, true); // ByteRate = SampleRate * NumChannels * BitsPerSample/8
+    view.setUint16(32, 2, true);            // BlockAlign = NumChannels * BitsPerSample/8
+    view.setUint16(34, 16, true);           // BitsPerSample = 16
+    view.setUint32(36, 0x64617461, false);  // "data"
+    view.setUint32(40, len, true);          // Subchunk2Size
+
+    for (let i = 0; i < len; i++) {
+        view.setUint8(44 + i, bytes[i]);
+    }
+
+    const blob = new Blob([buffer], { type: 'audio/wav' });
+    return URL.createObjectURL(blob);
+}
+
+// Keep track of any currently playing audio so we can stop it
+let currentSpeechAudio = null;
+
+function stopVoiceExamAudio() {
+    if (currentSpeechAudio) {
+        currentSpeechAudio.pause();
+        currentSpeechAudio = null;
+    }
+}
+
+async function playAudio(textToSpeak) {
+    stopVoiceExamAudio();
+    try {
+        const payload = {
+            contents: [{ parts: [{ text: textToSpeak }] }],
+            generationConfig: {
+                responseModalities: ["AUDIO"],
+                speechConfig: {
+                    voiceConfig: {
+                        prebuiltVoiceConfig: {
+                            voiceName: "Kore"
+                        }
+                    }
+                }
+            }
+        };
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+        const result = await fetchWithRetry(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const audioPart = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+        if (audioPart) {
+            const base64Audio = audioPart.inlineData.data;
+            const mimeType = audioPart.inlineData.mimeType || "";
+            let sampleRate = 24000;
+            const rateMatch = mimeType.match(/rate=(\d+)/);
+            if (rateMatch && rateMatch[1]) {
+                sampleRate = parseInt(rateMatch[1]);
+            }
+            const audioUrl = pcmToWav(base64Audio, sampleRate);
+            currentSpeechAudio = new Audio(audioUrl);
+            currentSpeechAudio.play();
+        }
+    } catch (err) {
+        console.error("Audio generation failed:", err);
+    }
+}
+
+// 🎙️ Voice Exam Mode Functions
+function startVoiceExam() {
+    stopVoiceExamAudio();
+    if (state.voiceTimerInterval) {
+        clearInterval(state.voiceTimerInterval);
+    }
+    
+    const mode = document.getElementById('voice-exam-mode-select').value;
+    if (mode === 'feynman') {
+        state.voiceExamIndex = -1;
+        state.currentVoiceQuestion = "Explain why operating off the Product-Process Matrix diagonal incurs high opportunity costs or out-of-pocket expenses. Describe what happens when a company moves too far right (too flexible) or too far left (too rigid). Speak continuously to demonstrate complete mastery of the diagonal of fit, cost flexibility, and structural layout trade-offs.";
+    } else {
+        state.voiceExamIndex = Math.floor(Math.random() * quizQuestions.length);
+        state.currentVoiceQuestion = quizQuestions[state.voiceExamIndex].q;
+    }
+    
+    document.getElementById('voice-question-area').innerText = `Question: "${state.currentVoiceQuestion}"`;
+    document.getElementById('voice-answer-transcript').value = "";
+    document.getElementById('voice-grading-output-card').classList.add('hidden');
+    
+    // Play spoken audio prompt
+    const voiceIntroSpeech = `Say in a direct, professional academic voice: Let's begin the oral exam. Here is your question: ${state.currentVoiceQuestion}`;
+    playAudio(voiceIntroSpeech);
+
+    // Start 120s timer
+    state.voiceTimerVal = 120;
+    const timerDisplay = document.getElementById('voice-timer-display');
+    timerDisplay.classList.remove('hidden');
+    timerDisplay.innerText = `TIMER: ${state.voiceTimerVal}s`;
+    
+    state.voiceTimerInterval = setInterval(() => {
+        state.voiceTimerVal--;
+        timerDisplay.innerText = `TIMER: ${state.voiceTimerVal}s`;
+        if (state.voiceTimerVal <= 0) {
+            clearInterval(state.voiceTimerInterval);
+            timerDisplay.innerText = "TIME OUT!";
+            playBeepSound();
+            stopVoiceDictation();
+        }
+    }, 1000);
+}
+
+function toggleVoiceDictation() {
+    if (!recognition) {
+        alert("Speech Recognition is not fully supported in this browser. Please type your answer manually in the space provided.");
+        return;
+    }
+
+    const btnText = document.getElementById('voice-record-text');
+    const btnIcon = document.getElementById('voice-record-icon');
+    const btnElem = document.getElementById('voice-record-btn');
+
+    if (state.speechActive) {
+        recognition.stop();
+        state.speechActive = false;
+        btnText.innerText = "Tap to Speak Answer";
+        btnIcon.innerText = "🎙️";
+        btnElem.className = "px-3.5 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 border border-red-200 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all shadow-sm";
+    } else {
+        try {
+            recognition.start();
+            state.speechActive = true;
+            btnText.innerText = "Listening... Tap to Stop";
+            btnIcon.innerText = "🔴";
+            btnElem.className = "px-3.5 py-1.5 bg-red-500 hover:bg-red-600 text-white border border-red-600 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all shadow-sm animate-pulse";
+        } catch (err) {
+            console.error(err);
+        }
+    }
+}
+
+function stopVoiceDictation() {
+    if (state.speechActive && recognition) {
+        recognition.stop();
+        state.speechActive = false;
+        document.getElementById('voice-record-text').innerText = "Tap to Speak Answer";
+        document.getElementById('voice-record-icon').innerText = "🎙️";
+        document.getElementById('voice-record-btn').className = "px-3.5 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 border border-red-200 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all shadow-sm";
+    }
+}
+
+async function submitVoiceAnswer() {
+    stopVoiceDictation();
+    if (state.voiceTimerInterval) {
+        clearInterval(state.voiceTimerInterval);
+    }
+
+    const studentAnswer = document.getElementById('voice-answer-transcript').value.trim();
+    if (!studentAnswer) {
+        alert("Please speak or type an answer before submitting!");
+        return;
+    }
+    if (!state.currentVoiceQuestion) {
+        alert("Please start the voice exam first!");
+        return;
+    }
+
+    showAiLoader(true);
+    try {
+        const mode = document.getElementById('voice-exam-mode-select').value;
+        let targetExpected = "";
+        let promptBonus = "";
+        
+        if (mode === 'feynman') {
+            targetExpected = "The Product-Process Matrix, the natural diagonal of fit, and cost penalties: opportunity costs on the right (too flexible for the volume) and out-of-pocket costs/rigidity on the left (too standardized for the variety).";
+            promptBonus = `Since this is a Feynman active memo, be extremely rigorous in detecting:
+1. Conceptual Gaps: Missed layout terms, incorrect cost definitions.
+2. Hesitations: Long pauses, filler words ('uh', 'um', 'like', repeating words).
+3. Vague Words: Soft expressions ('stuff', 'things', 'whatever').`;
+        } else {
+            targetExpected = quizQuestions[state.voiceExamIndex].expected;
+        }
+
+        const systemPrompt = "You are a professional Socratic Operations Management Examiner. Analyze student spoken notes for accuracy, grade on a 0-100 scale, and format response as valid JSON.";
+        const promptText = `Evaluate the student's verbal answer. 
+The oral board question was: "${state.currentVoiceQuestion}". 
+The correct textbook reference concept is: "${targetExpected}".
+The student answered: "${studentAnswer}".
+
+${promptBonus}
+
+Grade their accuracy. Your response MUST be valid JSON with this schema:
+{
+  "score": <number between 0 and 100>,
+  "critique": "<HTML formatted response explaining errors, praising correct uses of course terms (volume, variety, layout, standard, visibility), and listing remedies. Include a dedicated section analyzing (a) Conceptual Gaps, (b) Hesitations detected, and (c) Vague words found.>",
+  "speechSummary": "<One natural spoken sentence evaluating their performance, including their score and principal conceptual gap for speech synthesis>",
+  "weakConcepts": [
+    {
+      "concept": "<concept name>",
+      "explanation": "<why they got it wrong or missed it>",
+      "remedy": "<mastery action to remedy this gap>"
+    }
+  ]
+}`;
+
+        const payload = {
+            contents: [{ parts: [{ text: promptText }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "OBJECT",
+                    properties: {
+                        score: { type: "INTEGER" },
+                        critique: { type: "STRING" },
+                        speechSummary: { type: "STRING" },
+                        weakConcepts: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    concept: { type: "STRING" },
+                                    explanation: { type: "STRING" },
+                                    remedy: { type: "STRING" }
+                                },
+                                required: ["concept", "explanation", "remedy"]
+                            }
+                        }
+                    },
+                    required: ["score", "critique", "speechSummary", "weakConcepts"]
+                }
+            }
+        };
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        const result = await fetchWithRetry(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        const parsed = JSON.parse(textResponse);
+
+        document.getElementById('voice-score-badge').innerText = `${parsed.score} / 100`;
+        document.getElementById('voice-critique-text').innerHTML = parsed.critique;
+        document.getElementById('voice-grading-output-card').classList.remove('hidden');
+
+        // If we are in Feynman mode, store the weak concepts to t11 and complete the task
+        if (mode === 'feynman') {
+            state.weakConcepts['t11'] = parsed.weakConcepts;
+            state.tasksCompleted.add('t11');
+            renderChecklist();
+            renderWeakConceptsShelf();
+        }
+
+        // Speak the grade / critique overview aloud
+        const liveCritiqueSpeech = `Say in a cheerful, clear voice: Evaluation Complete! ${parsed.speechSummary}`;
+        playAudio(liveCritiqueSpeech);
+    } catch (err) {
+        alert("Critique generation failed: " + err.message);
+    } finally {
+        showAiLoader(false);
+    }
+}
+
+async function generateQuestion() {
+    showAiLoader(true);
+    try {
+        const vol = document.getElementById('val-vol').innerText;
+        const varity = document.getElementById('val-var').innerText;
+        const vardem = document.getElementById('val-vardem').innerText;
+        const vis = document.getElementById('val-vis').innerText;
+
+        const systemPrompt = "You are a strict, world-class Operations Management Professor. Your questions are tough but fair, testing deep application rather than memorization. Do not write introductory or conversational fluff; output ONLY the question directly.";
+        const promptText = `Based on the following Operations Management topic parameters: Volume is ${vol}, Variety is ${varity}, Demand Variation is ${vardem}, and Visibility is ${vis}. Please generate one challenging, scenario-based Master's level oral examination question. Do not provide options, hints or answers. Focus on a realistic business dilemma (like J&J, Pret A Manger, or a similar enterprise context) where the user has to apply layout choices, process designs, or the 4 Vs framework to defend their strategic choices. Make it brief and direct.`;
+
+        const payload = {
+            contents: [{ parts: [{ text: promptText }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] }
+        };
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        const result = await fetchWithRetry(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "Failed to generate a question. Please try again.";
+        state.currentQuestion = text;
+        document.getElementById('exam-question-area').innerText = text;
+        document.getElementById('student-answer-input').value = "";
+        document.getElementById('grading-output-card').classList.add('hidden');
+        document.getElementById('btn-completion-mark').classList.add('hidden');
+    } catch (err) {
+        document.getElementById('exam-question-area').innerText = "Error: " + err.message;
+    } finally {
+        showAiLoader(false);
+    }
+}
+
+async function submitAnswer() {
+    const studentAnswer = document.getElementById('student-answer-input').value.trim();
+    if (!studentAnswer) {
+        alert("Please write down an answer response before submitting!");
+        return;
+    }
+    if (!state.currentQuestion) {
+        alert("Please generate a question first!");
+        return;
+    }
+
+    showAiLoader(true);
+    try {
+        const systemPrompt = "You are a helpful yet rigorous Operations Management grading assistant. Output clear, well-structured critique. You must output structured text inside a JSON response format. You are structured as a JSON generator.";
+        const promptText = `Analyze the student's response to the exam question. 
+The question was: "${state.currentQuestion}". 
+The student answered: "${studentAnswer}". 
+Evaluate their answer scientifically. Your response MUST be valid JSON with the following exactly:
+{
+  "score": <number between 0 and 100>,
+  "critique": "<Detailed HTML-formatted critique string highlighting gaps, accuracy, and course integration using 4 Vs, Product-Process Matrix, or layout concepts>",
+  "gapSummary": "<One simple sentence summarizing the major conceptual gap identified for speech synthesis>"
+}`;
+
+        const payload = {
+            contents: [{ parts: [{ text: promptText }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "OBJECT",
+                    properties: {
+                        score: { type: "INTEGER" },
+                        critique: { type: "STRING" },
+                        gapSummary: { type: "STRING" }
+                    },
+                    required: ["score", "critique", "gapSummary"]
+                }
+            }
+        };
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        const result = await fetchWithRetry(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        const parsed = JSON.parse(textResponse);
+
+        state.latestScore = parsed.score;
+        state.latestCritiqueText = parsed.critique;
+        state.latestAnalysis = parsed.gapSummary;
+
+        document.getElementById('student-score-badge').innerText = `${parsed.score} / 100`;
+        document.getElementById('grading-critique-text').innerHTML = parsed.critique;
+        document.getElementById('grading-output-card').classList.remove('hidden');
+        document.getElementById('btn-completion-mark').classList.remove('hidden');
+    } catch (err) {
+        alert("Critique generation failed: " + err.message);
+    } finally {
+        showAiLoader(false);
+    }
+}
+
+function playCritiqueTTS() {
+    if (!state.latestAnalysis) return;
+    const scoreVal = state.latestScore !== null ? state.latestScore : "unknown";
+    const speechText = `Say cheerfully: Let's review the critique. Your operations score is ${scoreVal} percent. The key conceptual gap identified is: ${state.latestAnalysis}. Keep working hard, you've got this!`;
+    playAudio(speechText);
+}
+
+function markStep10Complete() {
+    toggleTask('t10');
+    document.getElementById('btn-completion-mark').classList.add('hidden');
+    navTo('protocol');
+}
+
+async function askExplainer() {
+    const query = document.getElementById('explainer-query-input').value.trim();
+    if (!query) {
+        alert("Please enter a question or operational concept first!");
+        return;
+    }
+
+    showAiLoader(true);
+    try {
+        const systemPrompt = "You are an expert tutor in Operations and Process Management. Keep explanations concise, clear, and focused on Master's degree curriculum materials. Do not include markdown formatting code blocks, just readable text.";
+        const promptText = `Explain the following Operations Management query clearly in 3-4 sentences using course concepts (the 4 Vs, hierarchies, or process types): "${query}"`;
+
+        const payload = {
+            contents: [{ parts: [{ text: promptText }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] }
+        };
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        const result = await fetchWithRetry(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Unable to retrieve explanation. Please try again.";
+        state.latestExplainerAnswer = responseText;
+        document.getElementById('explainer-output-area').innerText = responseText;
+        document.getElementById('explainer-audio-button-container').classList.remove('hidden');
+    } catch (err) {
+        document.getElementById('explainer-output-area').innerText = "Error: " + err.message;
+    } finally {
+        showAiLoader(false);
+    }
+}
+
+function playExplainerTTS() {
+    if (!state.latestExplainerAnswer) return;
+    const speechText = `Say in a helpful voice: Here is the concept overview. ${state.latestExplainerAnswer}`;
+    playAudio(speechText);
+}
+
+window.onload = initApp;
+</script>
+</body>
+</html>
