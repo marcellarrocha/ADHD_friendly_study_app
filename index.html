@@ -325,23 +325,18 @@ body {
 
             <div id="checklist-container" class="space-y-4">
             </div>
-
-            <div id="weak-concepts-shelf" class="hidden p-5 bg-[#fef2f2] border border-[#fca5a5] rounded-xl space-y-3 transition-all duration-300">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">📚</span>
-                    <h3 class="font-bold text-[#991b1b] text-base">Weak Concepts Review Shelf</h3>
-                </div>
-                <p class="text-xs text-[#b91c1c] leading-relaxed">
-                    The following concepts were diagnosed from your note uploads. Review these critical points before taking your final mock board exam.
-                </p>
-                <div id="shelf-items" class="space-y-3">
-                </div>
-            </div>
             
-            <div id="completion-message" class="hidden mt-8 bg-[#fef3c7] border border-[#f59e0b] p-6 rounded-xl text-center">
-                <div class="text-4xl mb-2">&#127942;</div>
+            <div id="completion-message" class="hidden mt-8 bg-[#fffbeb] border border-[#f59e0b] p-6 rounded-xl text-center space-y-4">
+                <div class="text-4xl">🏆</div>
                 <h3 class="text-xl font-bold text-[#92400e]">Topic 01 Complete!</h3>
-                <p class="text-[#92400e] mt-2">You have successfully moved from passive recognition to active retrieval.</p>
+                <p class="text-[#92400e] mt-2">You have successfully moved from passive recognition to active retrieval across all steps.</p>
+                <div class="pt-4">
+                    <button onclick="generateOverallTopicGrade()" class="bg-[#d97706] hover:bg-[#b45309] text-white text-sm font-bold px-6 py-3 rounded-xl transition-all shadow-md">
+                        ✨ Generate Overall Knowledge Diagnostic Report
+                    </button>
+                </div>
+                <div id="overall-grade-report" class="hidden mt-6 text-left bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-4">
+                </div>
             </div>
         </div>
     </section>
@@ -413,7 +408,7 @@ const checklistData = [
     { block: 'Block D: Active Stress-Tests', tasks: [
         { id: 't9', text: 'Step 9: Review Quizzes and Self-Assessment Notes (Cover answers).' },
         { id: 't10', text: 'Step 10: Run the Embedded Socratic Examiner above and submit feedback.' },
-        { id: 't11', text: 'Step 11: Go to AI Center (Voice Mode), complete your Feynman Voice Memo on the Matrix Diagonal, and submit for evaluation.', duration: 120, hasUpload: false }
+        { id: 't11', text: 'Go to AI Center (Voice Mode), complete your Feynman Voice Memo on the Matrix Diagonal, and submit for evaluation.', duration: 120, hasUpload: false }
     ]}
 ];
 
@@ -444,7 +439,8 @@ const state = {
     currentVoiceQuestion: '',
     voiceTimerVal: 120,
     voiceTimerInterval: null,
-    speechActive: false
+    speechActive: false,
+    overallCumulativeGradeReport: null
 };
 
 let runningIntervals = {};
@@ -493,24 +489,107 @@ function getSliderLabel(val) {
 function analyze4Vs(vol, varity, vardem, vis) {
     let costAssumption = 'Medium';
     let layoutAssumption = 'Batch / Functional';
-    let text = '';
+    let textSegments = [];
 
-    if (vol > 66 && varity < 33 && vardem < 33 && vis < 33) {
+    // 1. Dynamic Cost Assumption
+    const costIndex = ((100 - vol) + varity + vardem + vis) / 4;
+    if (costIndex < 25) {
         costAssumption = 'Very Low';
-        layoutAssumption = 'Continuous / Line';
-        text = 'Profile points to Mass/Continuous processes. High standardization allows for heavy automation and rock-bottom unit costs (e.g., Formule 1 Hotel, Bottling plant).';
-    } else if (vol < 33 && varity > 66 && vis > 66) {
+    } else if (costIndex < 45) {
+        costAssumption = 'Low';
+    } else if (costIndex < 65) {
+        costAssumption = 'Medium';
+    } else if (costIndex < 85) {
         costAssumption = 'High';
-        layoutAssumption = 'Project / Fixed-Position';
-        text = 'Profile points to highly customized, customer-facing services. Requires highly skilled staff and immense flexibility (e.g., Luxury bespoke services, consulting).';
-    } else if (vol > 50 && varity > 50) {
-        text = 'Warning: High volume and high variety simultaneously is difficult to achieve without massive capital investment in agile/flexible manufacturing systems.';
-        layoutAssumption = 'Cellular';
     } else {
-        text = 'A balanced profile typical of Batch processing or Service Shops. Requires balancing standardization with necessary customer variety.';
+        costAssumption = 'Very High';
     }
 
-    document.getElementById('analysis-text').innerText = text + ` (Est. Unit Cost: ${costAssumption} | Optimal Layout: ${layoutAssumption})`;
+    // 2. Dynamic Layout & Process Type
+    let processType = "Batch Operations / Service Shop";
+    if (vol > 70 && varity < 30) {
+        layoutAssumption = 'Continuous / Product Line Layout';
+        processType = 'Continuous Process (e.g., refinery) or Mass Service';
+    } else if (vol > 60 && varity < 45) {
+        layoutAssumption = 'Product / Assembly Line Layout';
+        processType = 'Mass Process (e.g., auto assembly) or Mass Service';
+    } else if (vol < 30 && varity > 70) {
+        layoutAssumption = 'Fixed-Position / Project Layout';
+        processType = 'Project Process (e.g., construction) or Professional Service';
+    } else if (vol < 45 && varity > 55) {
+        layoutAssumption = 'Functional / Process Layout';
+        processType = 'Jobbing Process (e.g., custom tailor) or Professional Service';
+    } else if (vol >= 45 && vol <= 65 && varity >= 45 && varity <= 65) {
+        layoutAssumption = 'Cellular Layout';
+        processType = 'Batch Process / Cellular Manufacturing or Service Shop';
+    } else {
+        layoutAssumption = 'Hybrid Layout';
+        processType = 'Hybrid Batch / Service Shop';
+    }
+
+    // 3. Dynamic description building
+    // Volume
+    if (vol > 66) {
+        textSegments.push("A high output volume facilitates high repeatability, task specialization, and standardized procedures.");
+    } else if (vol > 33) {
+        textSegments.push("A moderate volume supports standardized operational routines while retaining some system capacity.");
+    } else {
+        textSegments.push("A low volume limits repeatability, requiring multi-skilled staff and flexible operations.");
+    }
+
+    // Variety
+    if (varity > 66) {
+        textSegments.push("A high variety of offerings demands general-purpose facilities and adaptable task configurations.");
+    } else if (varity > 33) {
+        textSegments.push("A moderate variety allows batching similar tasks to balance cost with basic customization.");
+    } else {
+        textSegments.push("A highly standardized offering minimizes changeovers, maximizing flow repetition.");
+    }
+
+    // Variation
+    if (vardem > 66) {
+        textSegments.push("High demand variation creates seasonal capacity strains, needing scheduling buffers.");
+    } else if (vardem > 33) {
+        textSegments.push("Moderate demand variation allows planned, flexible capacity adjustments.");
+    } else {
+        textSegments.push("Predictable, stable demand maximizes asset utilization with low planning risk.");
+    }
+
+    // Visibility
+    if (vis > 66) {
+        textSegments.push("High visibility exposes processes to active customer interaction, demanding contact skills.");
+    } else if (vis > 33) {
+        textSegments.push("Medium visibility mixes interactive front-office with efficient back-office processing.");
+    } else {
+        textSegments.push("Low visibility allows back-office, factory-style layouts to maximize performance.");
+    }
+
+    // Diagonal/Fit check
+    const sumVolVar = vol + varity;
+    if (vol > 60 && varity > 60) {
+        textSegments.push("⚠️ Mismatch: High volume and variety simultaneously causes high operational complexity.");
+    } else if (vol < 40 && varity < 40) {
+        textSegments.push("⚠️ Mismatch: Low volume and variety suggests underutilized assets.");
+    } else if (sumVolVar >= 80 && sumVolVar <= 120) {
+        textSegments.push("Your configuration is aligned with the natural Product-Process diagonal.");
+    }
+
+    const description = textSegments.join(" ");
+    
+    document.getElementById('analysis-text').innerHTML = `
+        <div class="space-y-2">
+            <div>
+                <strong>Process Type:</strong> <span class="text-[#d97706] font-bold">${processType}</span>
+            </div>
+            <div class="text-xs text-[#57534e] leading-relaxed">
+                ${description}
+            </div>
+            <div class="mt-3 pt-2 border-t border-stone-200 flex flex-wrap gap-x-6 gap-y-1 text-xs font-semibold text-stone-600">
+                <span>💰 Est. Cost: <span class="text-[#d97706] font-bold">${costAssumption}</span></span>
+                <span>📐 Optimal Layout: <span class="text-[#059669] font-bold">${layoutAssumption}</span></span>
+            </div>
+        </div>
+    `;
 }
 
 function setupSliders() {
@@ -713,14 +792,29 @@ function renderChecklist() {
 
             let uploadHtml = '';
             if (task.hasUpload) {
-                const hasGaps = state.weakConcepts[task.id] && state.weakConcepts[task.id].length > 0;
+                const auditData = state.weakConcepts[task.id];
+                const hasData = auditData && ( (auditData.weakConcepts && auditData.weakConcepts.length > 0) || auditData.overallReview );
                 let gapListHtml = '';
-                if (hasGaps) {
-                    gapListHtml = `<div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg text-xs space-y-1.5 text-stone-700">
-                        <span class="font-bold text-[#991b1b]">Detected Concept Gaps (Review Later):</span>
-                        <ul class="list-disc pl-4 space-y-1 text-stone-600">
-                            ${state.weakConcepts[task.id].map(g => `<li><strong>${g.concept}</strong>: ${g.explanation} (Remedy: <span class="italic text-stone-700">${g.remedy}</span>)</li>`).join('')}
-                        </ul>
+                if (hasData) {
+                    const pctColor = auditData.capturePercentage >= 80 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : (auditData.capturePercentage >= 50 ? 'text-amber-600 bg-amber-50 border-amber-200' : 'text-rose-600 bg-rose-50 border-rose-200');
+                    gapListHtml = `
+                    <div class="mt-2 p-4 bg-red-50 border border-red-200 rounded-lg text-xs space-y-3 text-stone-700">
+                        <div class="flex items-center justify-between border-b border-red-100 pb-2">
+                            <span class="font-bold text-[#991b1b] uppercase tracking-wider">Note Audit Diagnostic</span>
+                            <span class="font-extrabold ${pctColor} px-2 py-0.5 rounded border">${auditData.capturePercentage}% Captured</span>
+                        </div>
+                        <div>
+                            <strong class="text-stone-800">Overall Capture Review:</strong>
+                            <p class="text-stone-600 mt-1 leading-relaxed">${auditData.overallReview}</p>
+                        </div>
+                        ${auditData.weakConcepts && auditData.weakConcepts.length > 0 ? `
+                        <div class="space-y-1">
+                            <strong class="text-stone-800">Concept Gaps (Highlighted / Post-Dump Colors):</strong>
+                            <ul class="list-disc pl-4 space-y-1.5 text-stone-600 mt-1">
+                                ${auditData.weakConcepts.map(g => `<li><strong>${g.concept}</strong>: ${g.explanation} (Remedy: <span class="italic text-stone-700">${g.remedy}</span>)</li>`).join('')}
+                            </ul>
+                        </div>
+                        ` : ''}
                     </div>`;
                 }
 
@@ -856,7 +950,7 @@ async function processNoteImage(taskId, base64Data, mimeType) {
 
     try {
         const systemPrompt = "You are an expert multi-modal Master's tutor in Operations and Process Management. Analyze note correction files and extract weak concept data in valid JSON format only.";
-        const promptText = "Analyze this image of hand-written student notes or study corrections. Identify the specific Operations Management terms, formulas, or concepts that the student marked, highlighted, or wrote in a different color (like red, orange, or highlighted marker) indicating they forgot them or made errors during active brain-dumping. Output your analysis strictly as JSON matching this schema: { \"weakConcepts\": [ { \"concept\": \"Name of concept\", \"explanation\": \"Concise OM explanation of what they missed or got wrong\", \"remedy\": \"Action plan to remedy this gap\" } ] }";
+        const promptText = "Analyze this image of hand-written student notes or study corrections. Compare it against the Operations Management course materials. The text written in black ink represents the student's initial brain dump. The text written or highlighted in another bright color (such as red, orange, blue, green, or highlighted marker) represents things they forgot, corrected, or added post-brain dump. Perform an overall review of how much of the defined subject the student successfully captured in black vs. what they missed or got wrong (represented by the colors). Output your analysis strictly as JSON matching this schema: { \"capturePercentage\": <number between 0 and 100 representing how much of the defined subject they successfully captured initially in black ink>, \"overallReview\": \"A comprehensive paragraph reviewing what they got right, evaluating their retention of the specific defined subject, and explaining the weight/importance of what they missed.\", \"weakConcepts\": [ { \"concept\": \"Name of concept or term written/highlighted in color\", \"explanation\": \"Concise explanation of what they missed or conceptualized wrongly\", \"remedy\": \"Action plan or textbook reference to remedy this specific gap\" } ] }";
 
         const payload = {
             contents: [{
@@ -872,6 +966,8 @@ async function processNoteImage(taskId, base64Data, mimeType) {
                 responseSchema: {
                     type: "OBJECT",
                     properties: {
+                        capturePercentage: { type: "INTEGER" },
+                        overallReview: { type: "STRING" },
                         weakConcepts: {
                             type: "ARRAY",
                             items: {
@@ -885,7 +981,7 @@ async function processNoteImage(taskId, base64Data, mimeType) {
                             }
                         }
                     },
-                    required: ["weakConcepts"]
+                    required: ["capturePercentage", "overallReview", "weakConcepts"]
                 }
             }
         };
@@ -900,59 +996,16 @@ async function processNoteImage(taskId, base64Data, mimeType) {
         const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
         const parsed = JSON.parse(textResponse);
 
-        if (parsed.weakConcepts && parsed.weakConcepts.length > 0) {
-            state.weakConcepts[taskId] = parsed.weakConcepts;
-            if (statusElem) statusElem.innerText = `Parsed ${parsed.weakConcepts.length} weak concepts successfully!`;
-        } else {
-            state.weakConcepts[taskId] = [];
-            if (statusElem) statusElem.innerText = "Analyzed note. No distinct red/correction items detected.";
-        }
+        state.weakConcepts[taskId] = parsed;
+        if (statusElem) statusElem.innerText = `Audit complete! Captured ${parsed.capturePercentage}%.`;
 
         renderChecklist();
-        renderWeakConceptsShelf();
     } catch (err) {
         if (statusElem) statusElem.innerText = "Analysis failed: " + err.message;
         alert("Image parsing failed: " + err.message);
     } finally {
         showAiLoader(false);
     }
-}
-
-function renderWeakConceptsShelf() {
-    const shelf = document.getElementById('weak-concepts-shelf');
-    const container = document.getElementById('shelf-items');
-    
-    const allGaps = [];
-    Object.keys(state.weakConcepts).forEach(taskId => {
-        const task = checklistData.flatMap(b => b.tasks).find(t => t.id === taskId);
-        const taskTitle = task ? task.text.split(':')[0] : 'Task';
-        state.weakConcepts[taskId].forEach(gap => {
-            allGaps.push({ ...gap, taskTitle });
-        });
-    });
-
-    if (allGaps.length === 0) {
-        shelf.classList.add('hidden');
-        return;
-    }
-
-    shelf.classList.remove('hidden');
-    let html = '';
-    allGaps.forEach(g => {
-        html += `
-            <div class="bg-white p-3 rounded-lg border border-red-200 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-md uppercase tracking-wider">${g.taskTitle}</span>
-                </div>
-                <h4 class="font-bold text-stone-900 text-sm mt-1">🔴 ${g.concept}</h4>
-                <p class="text-xs text-stone-600 mt-1">${g.explanation}</p>
-                <div class="mt-2 text-xs bg-stone-50 p-2 rounded border border-stone-200">
-                    <strong class="text-stone-800">Mastery Action:</strong> <span class="italic text-stone-600">${g.remedy}</span>
-                </div>
-            </div>
-        `;
-    });
-    container.innerHTML = html;
 }
 
 function toggleTask(id) {
@@ -978,6 +1031,116 @@ function updateProgress() {
         msgBlock.classList.remove('hidden');
     } else {
         msgBlock.classList.add('hidden');
+        document.getElementById('overall-grade-report').classList.add('hidden');
+    }
+}
+
+async function generateOverallTopicGrade() {
+    showAiLoader(true);
+    try {
+        const auditHistory = [];
+        Object.keys(state.weakConcepts).forEach(taskId => {
+            const task = checklistData.flatMap(b => b.tasks).find(t => t.id === taskId);
+            const taskTitle = task ? task.text.split(':')[0] : 'Task';
+            const data = state.weakConcepts[taskId];
+            if (data) {
+                auditHistory.push({
+                    task: taskTitle,
+                    capturedPercentage: data.capturePercentage,
+                    gaps: data.weakConcepts || []
+                });
+            }
+        });
+
+        const systemPrompt = "You are the head Socratic Professor of Operations and Process Management. Compile a final comprehensive topic grading card in valid JSON format only.";
+        const promptText = `Analyze this student's active learning history and compile a final comprehensive Topic 01 grading card based on their dynamic configurations, note analysis records, and overall performance.
+
+Here is their note upload audit history: ${JSON.stringify(auditHistory)}.
+Their visual 4 Vs slider selections are at: Volume: ${document.getElementById('val-vol').innerText}, Variety: ${document.getElementById('val-var').innerText}, Variation: ${document.getElementById('val-vardem').innerText}, Visibility: ${document.getElementById('val-vis').innerText}.
+
+Evaluate their overall knowledge of Topic 01 concepts (4 Vs, Product-Process Matrix, layout configurations, J&J Continuous Manufacturing, Business Process Re-engineering) on an academically rigorous Master's program scale.
+
+Your response MUST be valid JSON with this schema exactly:
+{
+  "finalScore": <integer final score between 0 and 100>,
+  "letterGrade": "<Master's letter grade e.g. A, B+, etc.>",
+  "strengths": "<HTML-formatted paragraph describing specific concepts they demonstrated good mastery of>",
+  "weaknesses": "<HTML list containing bullet points of critical weak concepts requiring immediate review before the final board exam>",
+  "oralVerdict": "<A single natural sentence spoken by the professor delivering their final verdict and encouraging review>"
+}`;
+
+        const payload = {
+            contents: [{ parts: [{ text: promptText }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "OBJECT",
+                    properties: {
+                        finalScore: { type: "INTEGER" },
+                        letterGrade: { type: "STRING" },
+                        strengths: { type: "STRING" },
+                        weaknesses: { type: "STRING" },
+                        oralVerdict: { type: "STRING" }
+                    },
+                    required: ["finalScore", "letterGrade", "strengths", "weaknesses", "oralVerdict"]
+                }
+            }
+        };
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const result = await fetchWithRetry(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        const parsed = JSON.parse(textResponse);
+        state.overallCumulativeGradeReport = parsed;
+
+        const reportContainer = document.getElementById('overall-grade-report');
+        reportContainer.innerHTML = `
+            <div class="border-b border-stone-200 pb-4 mb-4 flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl">🎓</span>
+                    <div>
+                        <h4 class="font-extrabold text-stone-900 text-lg">Overall Topic Diagnostic Report</h4>
+                        <p class="text-xs text-stone-500">Master's level cumulative performance review</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold uppercase text-stone-500">Grade:</span>
+                    <span class="text-lg font-extrabold text-[#d97706] px-3 py-1 bg-[#fffbeb] rounded-lg border border-[#fde68a]">${parsed.finalScore}% (${parsed.letterGrade})</span>
+                </div>
+            </div>
+            <div class="space-y-4 text-sm text-[#44403c] leading-relaxed">
+                <div>
+                    <h5 class="font-bold text-[#059669] uppercase tracking-wider text-xs mb-1">Demonstrated Strengths</h5>
+                    <p class="bg-stone-50 p-3 rounded-lg border border-stone-200">${parsed.strengths}</p>
+                </div>
+                <div>
+                    <h5 class="font-bold text-[#991b1b] uppercase tracking-wider text-xs mb-1">Concept Gaps requiring final review</h5>
+                    <div class="bg-red-50 p-3 rounded-lg border border-red-200 text-red-950 space-y-2">
+                        ${parsed.weaknesses}
+                    </div>
+                </div>
+                <div class="flex justify-end pt-2">
+                    <button onclick="playAudio('Say cheerfully: Overall diagnostic complete! ' + state.overallCumulativeGradeReport.oralVerdict)" class="flex items-center gap-2 bg-[#d97706] hover:bg-[#b45309] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm">
+                        <span>🔊</span> Listen to Oral Verdict
+                    </button>
+                </div>
+            </div>
+        `;
+        reportContainer.classList.remove('hidden');
+
+        // Play oral verdict automatically
+        const speakingText = `Say in a professional academic voice: Diagnostic complete. Your cumulative evaluation score is ${parsed.finalScore} percent, achieving a letter grade of ${parsed.letterGrade}. ${parsed.oralVerdict}`;
+        playAudio(speakingText);
+    } catch (err) {
+        alert("Overall diagnostic synthesis failed: " + err.message);
+    } finally {
+        showAiLoader(false);
     }
 }
 
@@ -1318,10 +1481,9 @@ Grade their accuracy. Your response MUST be valid JSON with this schema:
 
         // If we are in Feynman mode, store the weak concepts to t11 and complete the task
         if (mode === 'feynman') {
-            state.weakConcepts['t11'] = parsed.weakConcepts;
+            state.weakConcepts['t11'] = parsed;
             state.tasksCompleted.add('t11');
             renderChecklist();
-            renderWeakConceptsShelf();
         }
 
         // Speak the grade / critique overview aloud
