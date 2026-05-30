@@ -57,6 +57,22 @@ body {
 
 <main class="max-w-6xl mx-auto px-4 py-8 space-y-16">
 
+    <section id="settings" class="scroll-mt-20">
+        <div class="bg-white p-4 rounded-xl border border-[#e7e5e4] shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <span class="text-xl">⚙️</span>
+                <div>
+                    <h3 class="font-bold text-stone-900 text-sm">Workspace API Settings</h3>
+                    <p class="text-xs text-stone-500">Provide your Google AI Studio Gemini API Key to power the active Socratic study modules.</p>
+                </div>
+            </div>
+            <div class="flex gap-2 w-full md:w-auto">
+                <input id="api-key-input" type="password" class="flex-1 md:w-64 p-2 border border-[#d6d3d1] rounded-lg outline-none text-xs focus:ring-2 focus:ring-[#d97706]" placeholder="Paste Gemini API Key...">
+                <button onclick="saveApiKey()" class="bg-[#d97706] hover:bg-[#b45309] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm">Save Key</button>
+            </div>
+        </div>
+    </section>
+
     <section id="intro" class="scroll-mt-20">
         <div class="bg-white p-6 md:p-10 rounded-2xl shadow-sm border border-[#e7e5e4]">
             <h1 class="text-3xl md:text-4xl font-bold text-[#1c1917] mb-4">Topic 01: Operations & Process Management</h1>
@@ -353,7 +369,28 @@ body {
 let radarChartInstance = null;
 let scatterChartInstance = null;
 
-const apiKey = "";
+let apiKey = "";
+
+function getApiKey() {
+    const inputKey = document.getElementById('api-key-input').value.trim();
+    if (inputKey) return inputKey;
+    const stored = localStorage.getItem('user_gemini_api_key');
+    if (stored) return stored;
+    return apiKey;
+}
+
+function saveApiKey() {
+    const inputKey = document.getElementById('api-key-input').value.trim();
+    localStorage.setItem('user_gemini_api_key', inputKey);
+    alert("API Key saved and loaded successfully!");
+}
+
+function loadSavedKey() {
+    const stored = localStorage.getItem('user_gemini_api_key');
+    if (stored) {
+        document.getElementById('api-key-input').value = stored;
+    }
+}
 
 const caseData = [
     {
@@ -417,7 +454,7 @@ const quizQuestions = [
     { q: "All companies have an operations function but it is not always called by that name. Which of the following could be an operations function?", expected: "the local banks which are branches within a large international bank", explanation: "Local branches manage transactions, customer processes, and local resources, which is a classic service operation." },
     { q: "Which of the following decisions is least likely to be made by an operations manager?", expected: "deciding which market areas to manufacture products for", explanation: "Choosing market segments and targets is a corporate-level strategic marketing function." },
     { q: "What are the input resources to any transformation process?", expected: "staff, facilities, materials, information and customers", explanation: "Staff and facilities are transforming resources; materials, information, and customers are transformed resources." },
-    { q: "The philosophy that recommends the redesign of process boundaries and organizational responsibilities around end-to-end processes is called:", expected: "business process re-engineering", explanation: "BPR focuses on restructuring vertical, functional silos into horizontally integrated end-to-end process structures." },
+    { q: "The philosophy that recommends the redesign of process boundaries and organizational responsibilities around end-to-end processes is called:", expected: "business process re-engineering", explanation: "BPR030 focuses on restructuring vertical, functional silos into horizontally integrated end-to-end process structures." },
     { q: "Operations can be classified according to their volume and variety. Which of the following operations would be classified as high volume, low variety?", expected: "a fast-food restaurant", explanation: "Fast food places deliver identical, standardized products in massive daily volume." },
     { q: "How would you describe supermarkets in terms of the four Vs?", expected: "high volume, low variety, low variation and high visibility", explanation: "They operate with massive scale, highly repeatable items, steady demand profiles, and extremely high customer visibility/contact." },
     { q: "Which of the following is the correct order for process types starting with low volume/high variety and moving to high volume/low variety?", expected: "project processes, jobbing processes, batch processes, mass processes, continuous", explanation: "This represents the natural diagonal path from low-scale custom to endless flow automation on the product-process matrix." },
@@ -471,6 +508,7 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
 }
 
 function initApp() {
+    loadSavedKey();
     init4VChart();
     setupSliders();
     initMatrixChart();
@@ -491,7 +529,6 @@ function analyze4Vs(vol, varity, vardem, vis) {
     let layoutAssumption = 'Batch / Functional';
     let textSegments = [];
 
-    // 1. Dynamic Cost Assumption
     const costIndex = ((100 - vol) + varity + vardem + vis) / 4;
     if (costIndex < 25) {
         costAssumption = 'Very Low';
@@ -505,7 +542,6 @@ function analyze4Vs(vol, varity, vardem, vis) {
         costAssumption = 'Very High';
     }
 
-    // 2. Dynamic Layout & Process Type
     let processType = "Batch Operations / Service Shop";
     if (vol > 70 && varity < 30) {
         layoutAssumption = 'Continuous / Product Line Layout';
@@ -527,8 +563,6 @@ function analyze4Vs(vol, varity, vardem, vis) {
         processType = 'Hybrid Batch / Service Shop';
     }
 
-    // 3. Dynamic description building
-    // Volume
     if (vol > 66) {
         textSegments.push("A high output volume facilitates high repeatability, task specialization, and standardized procedures.");
     } else if (vol > 33) {
@@ -537,7 +571,6 @@ function analyze4Vs(vol, varity, vardem, vis) {
         textSegments.push("A low volume limits repeatability, requiring multi-skilled staff and flexible operations.");
     }
 
-    // Variety
     if (varity > 66) {
         textSegments.push("A high variety of offerings demands general-purpose facilities and adaptable task configurations.");
     } else if (varity > 33) {
@@ -546,7 +579,6 @@ function analyze4Vs(vol, varity, vardem, vis) {
         textSegments.push("A highly standardized offering minimizes changeovers, maximizing flow repetition.");
     }
 
-    // Variation
     if (vardem > 66) {
         textSegments.push("High demand variation creates seasonal capacity strains, needing scheduling buffers.");
     } else if (vardem > 33) {
@@ -555,7 +587,6 @@ function analyze4Vs(vol, varity, vardem, vis) {
         textSegments.push("Predictable, stable demand maximizes asset utilization with low planning risk.");
     }
 
-    // Visibility
     if (vis > 66) {
         textSegments.push("High visibility exposes processes to active customer interaction, demanding contact skills.");
     } else if (vis > 33) {
@@ -564,7 +595,6 @@ function analyze4Vs(vol, varity, vardem, vis) {
         textSegments.push("Low visibility allows back-office, factory-style layouts to maximize performance.");
     }
 
-    // Diagonal/Fit check
     const sumVolVar = vol + varity;
     if (vol > 60 && varity > 60) {
         textSegments.push("⚠️ Mismatch: High volume and variety simultaneously causes high operational complexity.");
@@ -986,7 +1016,8 @@ async function processNoteImage(taskId, base64Data, mimeType) {
             }
         };
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const activeKey = getApiKey();
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
         const result = await fetchWithRetry(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1046,7 +1077,7 @@ async function generateOverallTopicGrade() {
             if (data) {
                 auditHistory.push({
                     task: taskTitle,
-                    capturedPercentage: data.capturePercentage,
+                    capturedPercentage: data.capturePercentage || data.score || 0,
                     gaps: data.weakConcepts || []
                 });
             }
@@ -1088,7 +1119,8 @@ Your response MUST be valid JSON with this schema exactly:
             }
         };
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const activeKey = getApiKey();
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
         const result = await fetchWithRetry(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1134,7 +1166,6 @@ Your response MUST be valid JSON with this schema exactly:
         `;
         reportContainer.classList.remove('hidden');
 
-        // Play oral verdict automatically
         const speakingText = `Say in a professional academic voice: Diagnostic complete. Your cumulative evaluation score is ${parsed.finalScore} percent, achieving a letter grade of ${parsed.letterGrade}. ${parsed.oralVerdict}`;
         playAudio(speakingText);
     } catch (err) {
@@ -1242,8 +1273,12 @@ function pcmToWav(base64Data, sampleRate = 24000) {
     view.setUint32(36, 0x64617461, false);  // "data"
     view.setUint32(40, len, true);          // Subchunk2Size
 
-    for (let i = 0; i < len; i++) {
-        view.setUint8(44 + i, bytes[i]);
+    // Convert Big-Endian 16-bit PCM samples to Little-Endian expected by WAV
+    for (let i = 0; i < len; i += 2) {
+        if (i + 1 < len) {
+            const val = (bytes[i] << 8) | bytes[i + 1];
+            view.setInt16(44 + i, val, true);
+        }
     }
 
     const blob = new Blob([buffer], { type: 'audio/wav' });
@@ -1276,7 +1311,8 @@ async function playAudio(textToSpeak) {
                 }
             }
         };
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+        const activeKey = getApiKey();
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${activeKey}`;
         const result = await fetchWithRetry(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1321,11 +1357,9 @@ function startVoiceExam() {
     document.getElementById('voice-answer-transcript').value = "";
     document.getElementById('voice-grading-output-card').classList.add('hidden');
     
-    // Play spoken audio prompt
     const voiceIntroSpeech = `Say in a direct, professional academic voice: Let's begin the oral exam. Here is your question: ${state.currentVoiceQuestion}`;
     playAudio(voiceIntroSpeech);
 
-    // Start 120s timer
     state.voiceTimerVal = 120;
     const timerDisplay = document.getElementById('voice-timer-display');
     timerDisplay.classList.remove('hidden');
@@ -1464,7 +1498,8 @@ Grade their accuracy. Your response MUST be valid JSON with this schema:
                 }
             }
         };
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const activeKey = getApiKey();
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
 
         const result = await fetchWithRetry(url, {
             method: 'POST',
@@ -1479,14 +1514,12 @@ Grade their accuracy. Your response MUST be valid JSON with this schema:
         document.getElementById('voice-critique-text').innerHTML = parsed.critique;
         document.getElementById('voice-grading-output-card').classList.remove('hidden');
 
-        // If we are in Feynman mode, store the weak concepts to t11 and complete the task
         if (mode === 'feynman') {
             state.weakConcepts['t11'] = parsed;
             state.tasksCompleted.add('t11');
             renderChecklist();
         }
 
-        // Speak the grade / critique overview aloud
         const liveCritiqueSpeech = `Say in a cheerful, clear voice: Evaluation Complete! ${parsed.speechSummary}`;
         playAudio(liveCritiqueSpeech);
     } catch (err) {
@@ -1511,7 +1544,8 @@ async function generateQuestion() {
             contents: [{ parts: [{ text: promptText }] }],
             systemInstruction: { parts: [{ text: systemPrompt }] }
         };
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const activeKey = getApiKey();
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
 
         const result = await fetchWithRetry(url, {
             method: 'POST',
@@ -1572,7 +1606,8 @@ Evaluate their answer scientifically. Your response MUST be valid JSON with the 
                 }
             }
         };
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const activeKey = getApiKey();
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
 
         const result = await fetchWithRetry(url, {
             method: 'POST',
@@ -1627,7 +1662,8 @@ async function askExplainer() {
             contents: [{ parts: [{ text: promptText }] }],
             systemInstruction: { parts: [{ text: systemPrompt }] }
         };
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const activeKey = getApiKey();
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
 
         const result = await fetchWithRetry(url, {
             method: 'POST',
